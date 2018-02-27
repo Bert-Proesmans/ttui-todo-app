@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         adapter = new ListViewAdapter(this, R.layout.item_listview, herinneringList, databaseHelper);
         listView.setAdapter(adapter);
         title.setVisibility(View.VISIBLE);
-        title.setText("Total records: " + databaseHelper.getContactsCount());
+        title.setText("Total notifications: " + databaseHelper.getContactsCount());
     }
 
     @Override
@@ -68,18 +68,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void addingNewHerinneringDialog() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-        alertDialog.setTitle("voeg een herinnering toe");
+        alertDialog.setTitle("Add a notification");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setPadding(10, 10, 10, 10);
         layout.setOrientation(LinearLayout.VERTICAL);
 
         final EditText nameBox = new EditText(this);
-        nameBox.setHint("Naam");
+        nameBox.setHint("Name");
         layout.addView(nameBox);
 
         final EditText descriptionBox = new EditText(this);
-        descriptionBox.setHint("Beschrijving");
+        descriptionBox.setHint("Description");
         layout.addView(descriptionBox);
 
         alertDialog.setView(layout);
