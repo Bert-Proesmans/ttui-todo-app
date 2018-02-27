@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView;
     private ListViewAdapter adapter;
     private DatabaseHelper databaseHelper;
-    private List<Friend> friendList;
+    private List<Herinnering> herinneringList;
     private TextView title;
 
     @Override
@@ -33,17 +33,17 @@ public class MainActivity extends AppCompatActivity {
         title = (TextView)findViewById(R.id.total);
 
         databaseHelper = new DatabaseHelper(this);
-        friendList = new ArrayList<>();
+        herinneringList = new ArrayList<>();
         reloadingDatabase(); //loading table of DB to ListView
     }
 
     public void reloadingDatabase() {
-        friendList = databaseHelper.getAllFriends();
-        if (friendList.size() == 0) {
+        herinneringList = databaseHelper.getAllHerinnerings();
+        if (herinneringList.size() == 0) {
             Toast.makeText(this, "No record found in database!", Toast.LENGTH_SHORT).show();
             title.setVisibility(View.GONE);
         }
-        adapter = new ListViewAdapter(this, R.layout.item_listview, friendList, databaseHelper);
+        adapter = new ListViewAdapter(this, R.layout.item_listview, herinneringList, databaseHelper);
         listView.setAdapter(adapter);
         title.setVisibility(View.VISIBLE);
         title.setText("Total records: " + databaseHelper.getContactsCount());
@@ -59,28 +59,28 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.add) {
-            addingNewFriendDialog();
+            addingNewHerinneringDialog();
 
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void addingNewFriendDialog() {
+    private void addingNewHerinneringDialog() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-        alertDialog.setTitle("Add a new Friend");
+        alertDialog.setTitle("voeg een herinnering toe");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setPadding(10, 10, 10, 10);
         layout.setOrientation(LinearLayout.VERTICAL);
 
         final EditText nameBox = new EditText(this);
-        nameBox.setHint("Name");
+        nameBox.setHint("Naam");
         layout.addView(nameBox);
 
-        final EditText jobBox = new EditText(this);
-        jobBox.setHint("job");
-        layout.addView(jobBox);
+        final EditText descriptionBox = new EditText(this);
+        descriptionBox.setHint("Beschrijving");
+        layout.addView(descriptionBox);
 
         alertDialog.setView(layout);
 
@@ -88,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Friend friend = new Friend(getText(nameBox), getText(jobBox));
-                databaseHelper.addNewFriend(friend);
+                Herinnering herinnering = new Herinnering(getText(nameBox), getText(descriptionBox));
+                databaseHelper.addNewHerinnering(herinnering);
 
                 reloadingDatabase(); //reload the db to view
             }

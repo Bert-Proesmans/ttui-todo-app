@@ -13,14 +13,14 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "myFriendDB";
+    private static final String DATABASE_NAME = "myHerinneringDB";
 
-    // Friend table name
-    private static final String TABLE_FRIEND = "friend";
+    // Herinnering table name
+    private static final String TABLE_FRIEND = "herinnering";
 
     private static final String KEY_ID = "id";
     private static final String KEY_NAME = "name";
-    private static final String KEY_JOB = "job";
+    private static final String KEY_JOB = "description";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -43,22 +43,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Adding a new record (friend) to table
-    public void addNewFriend(Friend friend) {
+    // Adding a new record (herinnering) to table
+    public void addNewHerinnering(Herinnering herinnering) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_NAME, friend.getName());
-        values.put(KEY_JOB, friend.getJob());
+        values.put(KEY_NAME, herinnering.getName());
+        values.put(KEY_JOB, herinnering.getDescription());
 
         // inserting this record
         db.insert(TABLE_FRIEND, null, values);
         db.close(); // Closing database connection
     }
 
-    // Getting All Friends in Table of Database
-    public List<Friend> getAllFriends() {
-        List<Friend> friendList = new ArrayList<>();
+    // Getting All Herinnerings in Table of Database
+    public List<Herinnering> getAllHerinnerings() {
+        List<Herinnering> herinneringList = new ArrayList<>();
 
         // select query
         String selectQuery = "SELECT  * FROM " + TABLE_FRIEND;
@@ -69,35 +69,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all table records and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Friend friend = new Friend();
-                friend.setId(Integer.parseInt(cursor.getString(0)));
-                friend.setName(cursor.getString(1));
-                friend.setJob(cursor.getString(2));
+                Herinnering herinnering = new Herinnering();
+                herinnering.setId(Integer.parseInt(cursor.getString(0)));
+                herinnering.setName(cursor.getString(1));
+                herinnering.setDescription(cursor.getString(2));
 
-                // Adding friend to list
-                friendList.add(friend);
+                // Adding herinnering to list
+                herinneringList.add(herinnering);
             } while (cursor.moveToNext());
         }
 
-        return friendList;
+        return herinneringList;
     }
 
     // Updating a record in database table
-    public int updateFriend(Friend friend) {
+    public int updateHerinnering(Herinnering herinnering) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_NAME, friend.getName());
-        values.put(KEY_JOB, friend.getJob());
+        values.put(KEY_NAME, herinnering.getName());
+        values.put(KEY_JOB, herinnering.getDescription());
 
         // updating row
-        return db.update(TABLE_FRIEND, values, KEY_ID + " = ?", new String[]{String.valueOf(friend.getId())});
+        return db.update(TABLE_FRIEND, values, KEY_ID + " = ?", new String[]{String.valueOf(herinnering.getId())});
     }
 
     // Deleting a record in database table
-    public void deleteFriend(Friend friend) {
+    public void deleteHerinnering(Herinnering herinnering) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_FRIEND, KEY_ID + " = ?", new String[]{String.valueOf(friend.getId())});
+        db.delete(TABLE_FRIEND, KEY_ID + " = ?", new String[]{String.valueOf(herinnering.getId())});
         db.close();
     }
 

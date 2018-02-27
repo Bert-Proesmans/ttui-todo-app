@@ -14,17 +14,17 @@ import android.widget.Toast;
 
 import java.util.List;
 
-public class ListViewAdapter extends ArrayAdapter<Friend> {
+public class ListViewAdapter extends ArrayAdapter<Herinnering> {
 
     private MainActivity activity;
     private DatabaseHelper databaseHelper;
-    private List<Friend> friendList;
+    private List<Herinnering> herinneringList;
 
-    public ListViewAdapter(MainActivity context, int resource, List<Friend> objects, DatabaseHelper helper) {
+    public ListViewAdapter(MainActivity context, int resource, List<Herinnering> objects, DatabaseHelper helper) {
         super(context, resource, objects);
         this.activity = context;
         this.databaseHelper = helper;
-        this.friendList = objects;
+        this.herinneringList = objects;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ListViewAdapter extends ArrayAdapter<Friend> {
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                databaseHelper.deleteFriend(getItem(position)); //delete in db
+                databaseHelper.deleteHerinnering(getItem(position)); //delete in db
                 Toast.makeText(activity, "Deleted!", Toast.LENGTH_SHORT).show();
 
                 //reload the database to view
@@ -59,7 +59,7 @@ public class ListViewAdapter extends ArrayAdapter<Friend> {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(activity);
-                alertDialog.setTitle("Update a Friend");
+                alertDialog.setTitle("Update a Herinnering");
 
                 LinearLayout layout = new LinearLayout(activity);
                 layout.setPadding(10, 10, 10, 10);
@@ -69,12 +69,12 @@ public class ListViewAdapter extends ArrayAdapter<Friend> {
                 nameBox.setHint("Name");
                 layout.addView(nameBox);
 
-                final EditText jobBox = new EditText(activity);
-                jobBox.setHint("job");
-                layout.addView(jobBox);
+                final EditText descriptionBox = new EditText(activity);
+                descriptionBox.setHint("description");
+                layout.addView(descriptionBox);
 
                 nameBox.setText(getItem(position).getName());
-                jobBox.setText(getItem(position).getJob());
+                descriptionBox.setText(getItem(position).getDescription());
 
                 alertDialog.setView(layout);
 
@@ -82,9 +82,9 @@ public class ListViewAdapter extends ArrayAdapter<Friend> {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Friend friend = new Friend(nameBox.getText().toString(), jobBox.getText().toString());
-                        friend.setId(getItem(position).getId());
-                        databaseHelper.updateFriend(friend); //update to db
+                        Herinnering herinnering = new Herinnering(nameBox.getText().toString(), descriptionBox.getText().toString());
+                        herinnering.setId(getItem(position).getId());
+                        databaseHelper.updateHerinnering(herinnering); //update to db
                         Toast.makeText(activity, "Updated!", Toast.LENGTH_SHORT).show();
 
                         //reload the database to view
@@ -104,7 +104,7 @@ public class ListViewAdapter extends ArrayAdapter<Friend> {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(activity);
-                alertDialog.setTitle("Friend ");
+                alertDialog.setTitle("Herinnering ");
 
                 LinearLayout layout = new LinearLayout(activity);
                 layout.setPadding(10, 10, 10, 10);
@@ -113,11 +113,11 @@ public class ListViewAdapter extends ArrayAdapter<Friend> {
                 TextView nameBox = new TextView(activity);
                 layout.addView(nameBox);
 
-                TextView jobBox = new TextView(activity);
-                layout.addView(jobBox);
+                TextView descriptionBox = new TextView(activity);
+                layout.addView(descriptionBox);
 
-                nameBox.setText("Friend name: " + getItem(position).getName());
-                jobBox.setText("Friend job: " + getItem(position).getJob());
+                nameBox.setText("Herinnering name: " + getItem(position).getName());
+                descriptionBox.setText("Herinnering description: " + getItem(position).getDescription());
 
                 alertDialog.setView(layout);
                 alertDialog.setNegativeButton("OK", null);
