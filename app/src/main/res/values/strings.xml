@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">Project</string>
+    <string name="app_name">Notifications</string>
+    <string name="rbuttoncurrent">current location</string>
+    <string name="rbuttonmarked">marked location</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="google_maps_key">AIzaSyAs_IfzptkcXIduCx53WNOzQJeDXwol6_8</string>
+
 </resources>

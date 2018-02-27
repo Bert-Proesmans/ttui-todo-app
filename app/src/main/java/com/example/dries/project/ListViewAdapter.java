@@ -58,8 +58,9 @@ public class ListViewAdapter extends ArrayAdapter<Herinnering> {
         holder.btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(activity);
-                alertDialog.setTitle("Update a Herinnering");
+                alertDialog.setTitle("Update a Notification");
 
                 LinearLayout layout = new LinearLayout(activity);
                 layout.setPadding(10, 10, 10, 10);

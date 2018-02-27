@@ -10,8 +10,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Intent;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,40 +71,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addingNewHerinneringDialog() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-        alertDialog.setTitle("Add a notification");
+        //GEEN DIALOG MEER MAAR VERWIJZING NAAR MAPSACTIVITY!!!
+        Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+        startActivityForResult(intent, 1);
 
-        LinearLayout layout = new LinearLayout(this);
-        layout.setPadding(10, 10, 10, 10);
-        layout.setOrientation(LinearLayout.VERTICAL);
-
-        final EditText nameBox = new EditText(this);
-        nameBox.setHint("Name");
-        layout.addView(nameBox);
-
-        final EditText descriptionBox = new EditText(this);
-        descriptionBox.setHint("Description");
-        layout.addView(descriptionBox);
-
-        alertDialog.setView(layout);
-
-        alertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Herinnering herinnering = new Herinnering(getText(nameBox), getText(descriptionBox));
-                databaseHelper.addNewHerinnering(herinnering);
-
-                reloadingDatabase(); //reload the db to view
-            }
-        });
-
-        alertDialog.setNegativeButton("Cancel", null);
-
-        //show alert
-        alertDialog.show();
+       
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        // check if the request code is same as what is passed  here it is 2
+       // Toast.makeText(this, requestCode, Toast.LENGTH_SHORT).show();
+        if(resultCode== RESULT_OK)
+        {
+            reloadingDatabase();
+            Toast.makeText(this, "added", Toast.LENGTH_SHORT).show();
+        }
+        if(resultCode==RESULT_CANCELED){
+
+            Toast.makeText(this, "canceled", Toast.LENGTH_SHORT).show();
+        }
+    }
     //get text available in TextView/EditText
     private String getText(TextView textView) {
         return textView.getText().toString().trim();
