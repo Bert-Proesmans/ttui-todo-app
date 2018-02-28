@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
@@ -37,8 +38,10 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     private static final String TAG = "MainActivity";
     public static final String TODO_NOTIFICATION_CHANNEL_ID = "todo_channel";
     private static final int REQUEST_PERMISSION_REQUEST_ID = 34;
+    public static final String NEW_HERINNERING_ID_KEY = "new_herinnering_id";
 
     private GeofencingClient geofenceClient;
+    private GeofencingRequest pendingGeoRequest;
 
     private ListView listView;
     private ListViewAdapter adapter;
@@ -71,6 +74,10 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
             // Register the channel with the system
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.createNotificationChannel(channel);
+        }
+
+        if(!checkPermissions()) {
+            requestPermissions();
         }
     }
 
@@ -108,8 +115,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         //GEEN DIALOG MEER MAAR VERWIJZING NAAR MAPSACTIVITY!!!
         Intent intent = new Intent(MainActivity.this, MapsActivity.class);
         startActivityForResult(intent, 1);
-
-       //  setupGeofence(herinnering);
     }
 
     @Override
@@ -118,9 +123,17 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         super.onActivityResult(requestCode, resultCode, data);
         // check if the request code is same as what is passed  here it is 2
        // Toast.makeText(this, requestCode, Toast.LENGTH_SHORT).show();
-        if(resultCode== RESULT_OK)
+        int new_model_id = data.getIntExtra(NEW_HERINNERING_ID_KEY, -1);
+        if(resultCode== RESULT_OK && new_model_id > -1)
         {
             reloadingDatabase();
+
+            // TODO; Uncomment these statements AND remove the debug setupGeofence(..) call below!
+            // Herinnering new_model = databaseHelper.getHerinnering(new_model_id);
+            // setupGeofence(new_model);
+
+            // Debug call - remove when above statements are ok
+            setupGeofence(null);
 
             Toast.makeText(this, "added", Toast.LENGTH_SHORT).show();
         }
@@ -163,42 +176,59 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         }
     }
 
-    @SuppressLint("MissingPermission")
     private void setupGeofence(Herinnering model) {
-        // Test for necessary user provided permissions before storing geofence requests
-        if(!checkPermissions()) {
-            requestPermissions();
-            if(!checkPermissions()) {
-                Log.w(TAG, "Insufficient permissions!");
-                return;
-            }
-        }
-
+        // TODO; Replace following parameters with model content
         // Build geofence
-        String todo_description = "";
-        double todo_latitude = 0,
-                todo_longtitude = 0;
-        int todo_radius = 0;
+        String todo_description = "Geo-Event for Sydney";
+        // DBG (Sydney): -34, 151
+        double todo_latitude = -34,
+                todo_longtitude = 151;
+        int todo_radius = 200;
 
+        Log.d(TAG, "Setting up GEOFENCE");
         Geofence fence = new Geofence.Builder()
-            .setRequestId(todo_description)
-            // degrees, degrees and meters!
-            .setCircularRegion(todo_latitude, todo_longtitude, todo_radius)
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-            .build();
+                .setRequestId(todo_description)
+                // degrees, degrees and meters!
+                .setCircularRegion(todo_latitude, todo_longtitude, todo_radius)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build();
 
         // Build request to get notified for fence.
         GeofencingRequest request = new GeofencingRequest.Builder()
                 .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
                 .addGeofence(fence)
                 .build();
+        this.pendingGeoRequest = request;
+        // Further execution flows through onRequestPermissionsResult!
+
+        // Test for necessary user provided permissions before storing geofence requests
+        if(!checkPermissions()) {
+            Log.w(TAG, "Insufficient permissions!");
+            return;
+        }
+
+        performPendingGeofenceRequest();
+    }
+
+    @SuppressLint("MissingPermission")
+    private void performPendingGeofenceRequest() {
+        if(this.pendingGeoRequest == null) {
+            return;
+        }
+
+        if(!checkPermissions()) {
+            requestPermissions();
+            return;
+        }
 
         // Push the request to the client handling geo updates.
         // The intent indicates what code must be executed on trigger.
         Intent intent = new Intent(this, GeoBroadcastReceiver.class);
         PendingIntent geoProcessIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        this.geofenceClient.addGeofences(request, geoProcessIntent).addOnCompleteListener(this);
+        this.geofenceClient.addGeofences(pendingGeoRequest, geoProcessIntent).addOnCompleteListener(this);
         Log.i(TAG, "Geofence set!");
+        this.pendingGeoRequest = null;
     }
 
     //get text available in TextView/EditText
@@ -211,7 +241,8 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         if(task.isSuccessful()) {
             Toast.makeText(this, "Geofence added", Toast.LENGTH_SHORT).show();
         } else {
-            String errorMessage = task.getException().getMessage();
+            String errorMessage = "Error setting geofence!";
+            Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
             Log.e(TAG, errorMessage);
         }
     }
@@ -223,6 +254,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
                 Log.i(TAG, "Permission interaction cancelled");
             } else if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.i(TAG, "Received adequate permissions");
+                performPendingGeofenceRequest();
             } else {
                 // Permission denied
                 Snackbar.make(findViewById(R.id.main_content_pane),

@@ -35,6 +35,7 @@ public class GeofenceTransitionService extends JobIntentService {
             return;
         }
 
+        Log.d(TAG, "Processing GEO-event");
         int geofenceTransition = geoEvent.getGeofenceTransition();
         if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             List<Geofence> triggeringFences = geoEvent.getTriggeringGeofences();

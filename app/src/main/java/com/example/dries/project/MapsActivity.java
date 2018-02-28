@@ -47,14 +47,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //GOOGLE MAPS DATA MOET NOG UITGEHAALD WORDEN
                 //GOOGLE MAPS DATA MOET TOEGEVOEGD WORDEN AAN DE DB
                 //GOOGLE MAPS DATA MOET TOEGEVOEGD WORDEN AAN HERINNERING
-                // Executie van MainActivity.setupGeofence(..)
                 ////
+
+                int new_herinnering_model_key = -1;
+
                 if(nameBox.getText().toString().matches("")){
                     Herinnering herinnering = new Herinnering("no name", descriptionBox.getText().toString());
+                    // TODO; Retrieve inserted ID for model
                     databaseHelper.addNewHerinnering(herinnering);
 
                 }else{
                     Herinnering herinnering = new Herinnering(nameBox.getText().toString(), descriptionBox.getText().toString());
+                    // TODO; Retrieve inserted ID for model
                     databaseHelper.addNewHerinnering(herinnering);
                 }
 
@@ -63,6 +67,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
 
                 Intent returnIntent = new Intent();
+                // DBG; Remove the next statement when the model ID is known
+                new_herinnering_model_key = 0;
+                returnIntent.putExtra(MainActivity.NEW_HERINNERING_ID_KEY, new_herinnering_model_key);
                 setResult(MapsActivity.RESULT_OK, returnIntent);
                 finish();
 
