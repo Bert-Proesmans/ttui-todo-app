@@ -1,16 +1,25 @@
 package com.example.dries.project;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,13 +33,24 @@ import android.widget.Toast;
 import android.content.Intent;
 
 
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnCompleteListener<Void> {
 
-    private static final String TODO_NOTIFICATION_CHANNEL_ID = "todo_channel";
+    private static final String TAG = "MainActivity";
+    public static final String TODO_NOTIFICATION_CHANNEL_ID = "todo_channel";
+    private static final int REQUEST_PERMISSION_REQUEST_ID = 34;
+
+    private GeofencingClient geofenceClient;
 
     private ListView listView;
     private ListViewAdapter adapter;
@@ -49,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
         databaseHelper = new DatabaseHelper(this);
         herinneringList = new ArrayList<>();
         reloadingDatabase(); //loading table of DB to ListView
+
+        geofenceClient = LocationServices.getGeofencingClient(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create the NotificationChannel, but only on API 26+ because
@@ -99,27 +121,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, MapsActivity.class);
         startActivityForResult(intent, 1);
 
-       
+       //  setupGeofence(herinnering);
     }
-
-/*
-                // Build the notification..
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(notification_context,
-                        TODO_NOTIFICATION_CHANNEL_ID)
-                        .setSmallIcon(R.drawable.ic_launcher_foreground)
-                        .setDefaults(Notification.DEFAULT_SOUND)
-                        .setContentTitle("Herinnering")
-                        .setContentText("TEST")
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-                // .. and show it
-                NotificationManagerCompat notification_manager = NotificationManagerCompat.from(notification_context);
-
-                // Hack for using unique notification IDs
-                int notification_id = (int)new Date().getTime();
-                notification_manager.notify(notification_id, builder.build());
-            }
-        */
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -130,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
         if(resultCode== RESULT_OK)
         {
             reloadingDatabase();
+
             Toast.makeText(this, "added", Toast.LENGTH_SHORT).show();
         }
         if(resultCode==RESULT_CANCELED){
@@ -137,8 +141,107 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "canceled", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private boolean checkPermissions() {
+        int permissionState = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        return permissionState == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestPermissions() {
+        boolean shouldProvideRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION);
+
+        if(shouldProvideRationale) {
+            View.OnClickListener ok_listener = new View.OnClickListener() {
+
+                @Override
+                public void onClick(View view) {
+                    // Actually request permission
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
+                            REQUEST_PERMISSION_REQUEST_ID);
+                }
+            };
+
+            // Use a snackbar to present the user the request rationale.
+            Snackbar.make(findViewById(R.id.main_content_pane),
+                    "Fine access is necessary for geofences to work",
+                    Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Enable", ok_listener)
+                    .show();
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_PERMISSION_REQUEST_ID);
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void setupGeofence(Herinnering model) {
+        // Test for necessary user provided permissions before storing geofence requests
+        if(!checkPermissions()) {
+            requestPermissions();
+            if(!checkPermissions()) {
+                Log.w(TAG, "Insufficient permissions!");
+                return;
+            }
+        }
+
+        // Build geofence
+        String todo_description = "";
+        double todo_latitude = 0,
+                todo_longtitude = 0;
+        int todo_radius = 0;
+
+        Geofence fence = new Geofence.Builder()
+            .setRequestId(todo_description)
+            // degrees, degrees and meters!
+            .setCircularRegion(todo_latitude, todo_longtitude, todo_radius)
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+            .build();
+
+        // Build request to get notified for fence.
+        GeofencingRequest request = new GeofencingRequest.Builder()
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .addGeofence(fence)
+                .build();
+
+        // Push the request to the client handling geo updates.
+        // The intent indicates what code must be executed on trigger.
+        Intent intent = new Intent(this, GeoBroadcastReceiver.class);
+        PendingIntent geoProcessIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        this.geofenceClient.addGeofences(request, geoProcessIntent).addOnCompleteListener(this);
+        Log.i(TAG, "Geofence set!");
+    }
+
     //get text available in TextView/EditText
     private String getText(TextView textView) {
         return textView.getText().toString().trim();
+    }
+
+    @Override
+    public void onComplete(@NonNull Task<Void> task) {
+        if(task.isSuccessful()) {
+            Toast.makeText(this, "Geofence added", Toast.LENGTH_SHORT).show();
+        } else {
+            String errorMessage = task.getException().getMessage();
+            Log.e(TAG, errorMessage);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode == REQUEST_PERMISSION_REQUEST_ID) {
+            if(grantResults.length <= 0) {
+                Log.i(TAG, "Permission interaction cancelled");
+            } else if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.i(TAG, "Received adequate permissions");
+            } else {
+                // Permission denied
+                Snackbar.make(findViewById(R.id.main_content_pane),
+                        "Geofences aren't available without permissions",
+                        Snackbar.LENGTH_SHORT)
+                        .show();
+            }
+        }
     }
 }

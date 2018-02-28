@@ -50,6 +50,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //GOOGLE MAPS DATA MOET NOG UITGEHAALD WORDEN
                 //GOOGLE MAPS DATA MOET TOEGEVOEGD WORDEN AAN DE DB
                 //GOOGLE MAPS DATA MOET TOEGEVOEGD WORDEN AAN HERINNERING
+                // Executie van MainActivity.setupGeofence(..)
                 ////
                 if(nameBox.getText().toString().matches("")){
                     Herinnering herinnering = new Herinnering("no name", descriptionBox.getText().toString());
