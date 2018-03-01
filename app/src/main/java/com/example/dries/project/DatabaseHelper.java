@@ -6,6 +6,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
+import android.util.Log;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +25,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_ID = "id";
     private static final String KEY_NAME = "name";
     private static final String KEY_JOB = "description";
+    private static final String KEY_LAT = "latitude";
+    private static final String KEY_LONG = "longtitude";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -30,7 +36,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATE_FRIEND_TABLE = "CREATE TABLE " + TABLE_FRIEND + "("
                 + KEY_ID + " INTEGER PRIMARY KEY," + KEY_NAME + " TEXT,"
-                + KEY_JOB + " TEXT" + ")";
+                + KEY_JOB + " TEXT," + KEY_LAT + " TEXT," + KEY_LONG + " TEXT" + ")";
         db.execSQL(CREATE_FRIEND_TABLE);
     }
 
@@ -47,9 +53,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void addNewHerinnering(Herinnering herinnering) {
         SQLiteDatabase db = this.getWritableDatabase();
 
+
+
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, herinnering.getName());
         values.put(KEY_JOB, herinnering.getDescription());
+        values.put(KEY_LAT, herinnering.getCoordlat());
+        values.put(KEY_LONG, herinnering.getCoordlong());
 
         // inserting this record
         db.insert(TABLE_FRIEND, null, values);
@@ -72,7 +82,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Herinnering herinnering = new Herinnering();
                 herinnering.setId(Integer.parseInt(cursor.getString(0)));
                 herinnering.setName(cursor.getString(1));
+
+                //Log.e("yo", cursor.getString(3));
+
                 herinnering.setDescription(cursor.getString(2));
+                herinnering.setCoordlat(cursor.getString(3));
+                herinnering.setCoordlong(cursor.getString(4));
 
                 // Adding herinnering to list
                 herinneringList.add(herinnering);
@@ -89,6 +104,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, herinnering.getName());
         values.put(KEY_JOB, herinnering.getDescription());
+        values.put(KEY_LAT, herinnering.getCoordlat());
+        values.put(KEY_LONG, herinnering.getCoordlong());
 
         // updating row
         return db.update(TABLE_FRIEND, values, KEY_ID + " = ?", new String[]{String.valueOf(herinnering.getId())});

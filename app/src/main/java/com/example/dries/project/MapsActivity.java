@@ -17,10 +17,36 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+import com.google.android.gms.common.ConnectionResult;
+//import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerDragListener,
+        GoogleMap.OnMapLongClickListener,
+        GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
     private DatabaseHelper databaseHelper = new DatabaseHelper(this);;
+
+
+    private double longitude;
+    private double latitude;
+   // private GoogleApiClient googleApiClient;
+    private LatLng center;
+    Double latitudecenter;
+    Double longtitudecenter;
+    String coordlat;
+    String coordlong;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,10 +57,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        final RadioGroup rGroup = (RadioGroup)findViewById(R.id.radioGroup);
-        final RadioButton buttonCurrent = findViewById(R.id.buttoncurrent);
-        final RadioButton buttonMarked = findViewById(R.id.buttonmarked);
-
 
 
         final EditText nameBox = findViewById(R.id.item_name);
@@ -43,28 +65,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ////
-                //GOOGLE MAPS DATA MOET NOG UITGEHAALD WORDEN
-                //GOOGLE MAPS DATA MOET TOEGEVOEGD WORDEN AAN DE DB
-                //GOOGLE MAPS DATA MOET TOEGEVOEGD WORDEN AAN HERINNERING
-                ////
 
                 int new_herinnering_model_key = -1;
 
                 if(nameBox.getText().toString().matches("")){
-                    Herinnering herinnering = new Herinnering("no name", descriptionBox.getText().toString());
+                    Herinnering herinnering = new Herinnering("no name", descriptionBox.getText().toString(),coordlat,coordlong);
                     // TODO; Retrieve inserted ID for model
+
                     databaseHelper.addNewHerinnering(herinnering);
 
                 }else{
-                    Herinnering herinnering = new Herinnering(nameBox.getText().toString(), descriptionBox.getText().toString());
+
+                    Herinnering herinnering = new Herinnering(nameBox.getText().toString(), descriptionBox.getText().toString(),coordlat,coordlong);
                     // TODO; Retrieve inserted ID for model
                     databaseHelper.addNewHerinnering(herinnering);
                 }
 
-                if(buttonCurrent.isChecked()) {
-                    Toast.makeText(MapsActivity.this, "current location checked", Toast.LENGTH_LONG).show();
-                }
 
                 Intent returnIntent = new Intent();
                 // DBG; Remove the next statement when the model ID is known
@@ -91,30 +107,77 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public void onRadioButtonClicked(View view) {
-        // Is the button now checked?
-        boolean checked = ((RadioButton) view).isChecked();
-
-        // Check which radio button was clicked
-        switch(view.getId()) {
-            case R.id.buttoncurrent:
-                if (checked)
-                    // blalbabala
-                    break;
-            case R.id.buttonmarked:
-                if (checked)
-                    // baljblajopeijvaoj
-                    break;
-        }
-    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        // googleMapOptions.mapType(googleMap.MAP_TYPE_HYBRID)
+        //    .compassEnabled(true);
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng india = new LatLng(-34, 151);
+        mMap.addMarker(new MarkerOptions().position(india).title("Marker in India"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(india));
+        mMap.setOnMarkerDragListener(this);
+        mMap.setOnMapLongClickListener(this);
+    }
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(latLng).draggable(true));
+        center = mMap.getCameraPosition().target;
+
+        latitudecenter = center.latitude;
+        longtitudecenter =center.longitude;
+        coordlat = latitudecenter.toString();
+        coordlong = longtitudecenter.toString();
+        //NU NOG TOEVOEGEN AAN DB en DOORSTUREN ALS HERRINING OBJ
+    }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+        Toast.makeText(MapsActivity.this, "onMarkerDragStart", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+        Toast.makeText(MapsActivity.this, "onMarkerDrag", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+        // getting the Co-ordinates
+       // latitude = marker.getPosition().latitude;
+        //longitude = marker.getPosition().longitude;
+
+        //move to current position
+        moveMap();
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        Toast.makeText(MapsActivity.this, "onMarkerClick", Toast.LENGTH_SHORT).show();
+        return true;
+    }
+
+    private void moveMap() {
+        /**
+         * Creating the latlng object to store lat, long coordinates
+         * adding marker to map
+         * move the camera with animation
+         */
+        LatLng latLng = new LatLng(latitude, longitude);
+        mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .draggable(true)
+                .title("Marker in India"));
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+
+
     }
 }

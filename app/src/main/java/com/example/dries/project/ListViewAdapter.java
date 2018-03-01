@@ -74,6 +74,13 @@ public class ListViewAdapter extends ArrayAdapter<Herinnering> {
                 descriptionBox.setHint("description");
                 layout.addView(descriptionBox);
 
+                final TextView lat = new TextView(activity);
+                layout.addView(lat);
+
+                final TextView longt = new TextView(activity);
+                layout.addView(longt);
+
+
                 nameBox.setText(getItem(position).getName());
                 descriptionBox.setText(getItem(position).getDescription());
 
@@ -83,7 +90,7 @@ public class ListViewAdapter extends ArrayAdapter<Herinnering> {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Herinnering herinnering = new Herinnering(nameBox.getText().toString(), descriptionBox.getText().toString());
+                        Herinnering herinnering = new Herinnering(nameBox.getText().toString(), descriptionBox.getText().toString(),lat.getText().toString(),longt.getText().toString());
                         herinnering.setId(getItem(position).getId());
                         databaseHelper.updateHerinnering(herinnering); //update to db
                         Toast.makeText(activity, "Updated!", Toast.LENGTH_SHORT).show();
