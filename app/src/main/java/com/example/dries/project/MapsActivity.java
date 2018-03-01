@@ -70,6 +70,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 if(nameBox.getText().toString().matches("")){
                     Herinnering herinnering = new Herinnering("no name", descriptionBox.getText().toString(),coordlat,coordlong);
+
+
                     // TODO; Retrieve inserted ID for model
 
                     databaseHelper.addNewHerinnering(herinnering);
@@ -121,13 +123,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(india));
         mMap.setOnMarkerDragListener(this);
         mMap.setOnMapLongClickListener(this);
+
+        center = india;
+
+        latitudecenter = center.latitude;
+        longtitudecenter =center.longitude;
+        coordlat = latitudecenter.toString();
+        coordlong = longtitudecenter.toString();
+
     }
 
     @Override
     public void onMapLongClick(LatLng latLng) {
         mMap.clear();
         mMap.addMarker(new MarkerOptions().position(latLng).draggable(true));
-        center = mMap.getCameraPosition().target;
+        center = latLng;
 
         latitudecenter = center.latitude;
         longtitudecenter =center.longitude;
@@ -149,8 +159,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMarkerDragEnd(Marker marker) {
         // getting the Co-ordinates
-       // latitude = marker.getPosition().latitude;
-        //longitude = marker.getPosition().longitude;
+        latitude = marker.getPosition().latitude;
+        longitude = marker.getPosition().longitude;
 
         //move to current position
         moveMap();

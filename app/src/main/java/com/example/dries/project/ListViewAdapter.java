@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
+import android.util.Log;
 
 public class ListViewAdapter extends ArrayAdapter<Herinnering> {
 
@@ -39,7 +40,6 @@ public class ListViewAdapter extends ArrayAdapter<Herinnering> {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-
         holder.name.setText(getItem(position).getName());
 
         //Delete an item
@@ -74,12 +74,17 @@ public class ListViewAdapter extends ArrayAdapter<Herinnering> {
                 descriptionBox.setHint("description");
                 layout.addView(descriptionBox);
 
-                final TextView lat = new TextView(activity);
+                final EditText lat = new EditText(activity);
+                descriptionBox.setHint(getItem(position).getCoordlat());
                 layout.addView(lat);
 
-                final TextView longt = new TextView(activity);
+                final EditText longt = new EditText(activity);
+                descriptionBox.setHint(getItem(position).getCoordlong());
                 layout.addView(longt);
 
+
+                lat.setText(getItem(position).getCoordlat());
+                longt.setText(getItem(position).getCoordlong());
 
                 nameBox.setText(getItem(position).getName());
                 descriptionBox.setText(getItem(position).getDescription());

@@ -2,6 +2,9 @@ package com.example.dries.project;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import android.util.Log;
+
+
 /**
  * Created by dries on 27/02/2018.
  */
@@ -56,7 +59,7 @@ public class Herinnering {
     }
 
     public void setCoordlong(String coordlong) {
-        this.name = coordlong;
+        this.coordlong = coordlong;
     }
 
 

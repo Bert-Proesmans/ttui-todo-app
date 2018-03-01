@@ -36,7 +36,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATE_FRIEND_TABLE = "CREATE TABLE " + TABLE_FRIEND + "("
                 + KEY_ID + " INTEGER PRIMARY KEY," + KEY_NAME + " TEXT,"
-                + KEY_JOB + " TEXT," + KEY_LAT + " TEXT," + KEY_LONG + " TEXT" + ")";
+                + KEY_JOB + " TEXT," + KEY_LAT + " TEXT," + "longtitude" + " TEXT" + " )";
         db.execSQL(CREATE_FRIEND_TABLE);
     }
 
@@ -52,8 +52,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Adding a new record (herinnering) to table
     public void addNewHerinnering(Herinnering herinnering) {
         SQLiteDatabase db = this.getWritableDatabase();
-
-
 
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, herinnering.getName());
@@ -82,8 +80,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Herinnering herinnering = new Herinnering();
                 herinnering.setId(Integer.parseInt(cursor.getString(0)));
                 herinnering.setName(cursor.getString(1));
-
-                //Log.e("yo", cursor.getString(3));
 
                 herinnering.setDescription(cursor.getString(2));
                 herinnering.setCoordlat(cursor.getString(3));
