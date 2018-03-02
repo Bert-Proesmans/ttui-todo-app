@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -31,6 +33,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnCompleteListener<Void> {
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
     private GeofencingClient geofenceClient;
     private GeofencingRequest pendingGeoRequest;
+    private PendingIntent geoPendingIntent;
 
     private ListView listView;
     private ListViewAdapter adapter;
@@ -79,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         if(!checkPermissions()) {
             requestPermissions();
         }
+
+        Intent intent = new Intent(this, GeoBroadcastReceiver.class);
+        geoPendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     public void reloadingDatabase() {
@@ -128,17 +135,29 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         {
             reloadingDatabase();
 
-            // TODO; Uncomment these statements AND remove the debug setupGeofence(..) call below!
-            // Herinnering new_model = databaseHelper.getHerinnering(new_model_id);
-            // setupGeofence(new_model);
+            Herinnering new_model = null;
+            for (Herinnering h: databaseHelper.getAllHerinnerings()) {
+                if (h.getId() == (new_model_id)) {
+                    new_model = h;
+                    break;
+                }
+            }
 
-            // Debug call - remove when above statements are ok
-            setupGeofence(null);
+            setupGeofence(new_model);
+
+//            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, TODO_NOTIFICATION_CHANNEL_ID)
+//                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+//                    .setContentTitle("TODO Notificationn")
+//                    .setContentText("Title: test")
+//                    .setDefaults(NotificationCompat.DEFAULT_ALL)
+//                    .setPriority(NotificationCompat.PRIORITY_HIGH);
+//            int notification_id = (int)new Date().getTime();
+//            NotificationManagerCompat.from(this).notify(notification_id, mBuilder.build());
 
             Toast.makeText(this, "added", Toast.LENGTH_SHORT).show();
         }
-        if(resultCode==RESULT_CANCELED){
 
+        if(resultCode==RESULT_CANCELED){
             Toast.makeText(this, "canceled", Toast.LENGTH_SHORT).show();
         }
     }
@@ -177,12 +196,18 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     }
 
     private void setupGeofence(Herinnering model) {
-        // TODO; Replace following parameters with model content
+
+        if(model == null) {
+            Log.e(TAG, "Passed down model is NULL");
+            Log.w(TAG, "No geofence added..");
+            return;
+        }
+
         // Build geofence
-        String todo_description = "Geo-Event for Sydney";
-        // DBG (Sydney): -34, 151
-        double todo_latitude = -34,
-                todo_longtitude = 151;
+        String todo_description = model.getDescription();
+        double todo_latitude = Double.parseDouble(model.getCoordlat()),
+                todo_longtitude = Double.parseDouble(model.getCoordlong());
+        // TODO; Make this changeable through the model
         int todo_radius = 200;
 
         Log.d(TAG, "Setting up GEOFENCE");
@@ -224,9 +249,8 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
         // Push the request to the client handling geo updates.
         // The intent indicates what code must be executed on trigger.
-        Intent intent = new Intent(this, GeoBroadcastReceiver.class);
-        PendingIntent geoProcessIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        this.geofenceClient.addGeofences(pendingGeoRequest, geoProcessIntent).addOnCompleteListener(this);
+
+        this.geofenceClient.addGeofences(pendingGeoRequest, geoPendingIntent).addOnCompleteListener(this);
         Log.i(TAG, "Geofence set!");
         this.pendingGeoRequest = null;
     }
