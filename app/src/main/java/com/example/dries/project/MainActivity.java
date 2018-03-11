@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         super.onActivityResult(requestCode, resultCode, data);
         // check if the request code is same as what is passed  here it is 2
        // Toast.makeText(this, requestCode, Toast.LENGTH_SHORT).show();
-        int new_model_id = data.getIntExtra(NEW_HERINNERING_ID_KEY, -1);
+        long new_model_id = data.getLongExtra(NEW_HERINNERING_ID_KEY, -1);
         if(resultCode== RESULT_OK && new_model_id > -1)
         {
             reloadingDatabase();
@@ -264,6 +264,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     public void onComplete(@NonNull Task<Void> task) {
         if(task.isSuccessful()) {
             Toast.makeText(this, "Geofence added", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Geofence added onComplete success");
         } else {
             String errorMessage = "Error setting geofence!";
             Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();

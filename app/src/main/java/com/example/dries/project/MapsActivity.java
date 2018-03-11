@@ -66,27 +66,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
 
-                int new_herinnering_model_key = -1;
+                long new_herinnering_model_key = -1;
 
                 if(nameBox.getText().toString().matches("")){
                     Herinnering herinnering = new Herinnering("no name", descriptionBox.getText().toString(),coordlat,coordlong);
-
-
-                    // TODO; Retrieve inserted ID for model
-
-                    databaseHelper.addNewHerinnering(herinnering);
+                    new_herinnering_model_key = databaseHelper.addNewHerinnering(herinnering);
 
                 }else{
 
                     Herinnering herinnering = new Herinnering(nameBox.getText().toString(), descriptionBox.getText().toString(),coordlat,coordlong);
-                    // TODO; Retrieve inserted ID for model
-                    databaseHelper.addNewHerinnering(herinnering);
+                    new_herinnering_model_key = databaseHelper.addNewHerinnering(herinnering);
                 }
 
 
                 Intent returnIntent = new Intent();
-                // DBG; Remove the next statement when the model ID is known
-                new_herinnering_model_key = 0;
                 returnIntent.putExtra(MainActivity.NEW_HERINNERING_ID_KEY, new_herinnering_model_key);
                 setResult(MapsActivity.RESULT_OK, returnIntent);
                 finish();

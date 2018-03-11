@@ -16,7 +16,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "myHerinneringDB";
 
     // Herinnering table name
@@ -50,7 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Adding a new record (herinnering) to table
-    public void addNewHerinnering(Herinnering herinnering) {
+    public long addNewHerinnering(Herinnering herinnering) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -60,8 +60,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_LONG, herinnering.getCoordlong());
 
         // inserting this record
-        db.insert(TABLE_FRIEND, null, values);
+        long id = db.insert(TABLE_FRIEND, null, values);
         db.close(); // Closing database connection
+        return id;
     }
 
     // Getting All Herinnerings in Table of Database
