@@ -22,7 +22,6 @@ package="com.example.dries.project">
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service android:name=".GeofenceTransitionService" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,6 +29,16 @@ package="com.example.dries.project">
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver
+            android:name=".GeoBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" />
+
+        <service android:name=".GeofenceTransitionService"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
