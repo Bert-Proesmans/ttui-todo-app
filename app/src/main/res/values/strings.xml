@@ -4,5 +4,20 @@
     <string name="rbuttonmarked">marked location</string>
     <string name="title_activity_maps">Map</string>
     <string name="google_maps_key">AIzaSyAs_IfzptkcXIduCx53WNOzQJeDXwol6_8</string>
+    <string name="unknown_geofence_error">Unknown error (geofence)</string>
+    <string name="geofence_not_available">Geofences not avaliable</string>
+    <string name="geofence_too_many_geofences">Too many geofences registered</string>
+    <string name="geofence_too_many_pending_intents">Too many pending intents (geofence)</string>
+    <string name="insufficient_permissions">Missing geofence permissions</string>
+    <string name="geofences_added">Geofence added</string>
+    <string name="geofences_removed">geofence removed</string>
+    <string name="permission_rationale">For geofences to work we need access to your fine location</string>
+    <string name="permission_denied_explanation">Geofences are useless when access to your location is denied</string>
+    <string name="settings">Settings</string>
+    <string name="geofence_transition_invalid_type">invalid geofence type: %d</string>
+    <string name="geofence_transition_entered">Entered geofence</string>
+    <string name="geofence_transition_exited">left geofence</string>
+    <string name="unknown_geofence_transition">unexpected geofence transition</string>
+    <string name="geofence_transition_notification_text">TODO_REPLACE_NOTIFICATION_TEXT</string>
 
 </resources>

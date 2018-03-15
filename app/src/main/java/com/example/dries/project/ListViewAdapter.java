@@ -15,6 +15,8 @@ import android.widget.Toast;
 import java.util.List;
 import android.util.Log;
 
+import static android.provider.Settings.System.getString;
+
 public class ListViewAdapter extends ArrayAdapter<Herinnering> {
 
     private MainActivity activity;
